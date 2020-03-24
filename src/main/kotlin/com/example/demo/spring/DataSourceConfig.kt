@@ -1,7 +1,6 @@
 package com.example.demo.spring
 
 import com.zaxxer.hikari.HikariDataSource
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder
@@ -13,7 +12,6 @@ import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
-import javax.persistence.EntityManagerFactory
 import javax.sql.DataSource
 
 @Configuration
@@ -39,22 +37,17 @@ class DataSourceConfig {
     @Primary
     @Bean
     fun entityManagerFactory(
-            builder: EntityManagerFactoryBuilder,
-            dataSource: DataSource): LocalContainerEntityManagerFactoryBean {
+            builder: EntityManagerFactoryBuilder): LocalContainerEntityManagerFactoryBean {
         return builder
-                .dataSource(dataSource)
+                .dataSource(this.dataSource())
                 .packages("com.example.demo.api")
-                .persistenceUnit("mysql")
+                .persistenceUnit("rds")
                 .build()
     }
 
     @Primary
     @Bean
-    fun transactionManager(
-            entityManagerFactory: EntityManagerFactory): PlatformTransactionManager {
-        val transactionManager = JpaTransactionManager()
-        transactionManager.entityManagerFactory = entityManagerFactory
-
-        return transactionManager
+    fun transactionManager(builder: EntityManagerFactoryBuilder): JpaTransactionManager {
+        return JpaTransactionManager(entityManagerFactory(builder).`object`!!)
     }
 }

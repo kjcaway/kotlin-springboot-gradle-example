@@ -11,7 +11,6 @@ data class Member(
         @Id
         @Column(name = "id")
         var id: String = "",
-
         @Column(name = "name")
         var name: String = "",
         @Column(name = "type")

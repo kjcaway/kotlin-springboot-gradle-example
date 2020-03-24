@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/contents")
 class ContentsController {
-    @GetMapping("")
+    @GetMapping()
     fun index() = Content(1, "Test title", "TestTestTest")
 }
