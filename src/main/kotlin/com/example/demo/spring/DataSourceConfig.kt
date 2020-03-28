@@ -1,30 +1,36 @@
 package com.example.demo.spring
 
 import com.zaxxer.hikari.HikariDataSource
+import org.apache.ibatis.session.SqlSessionFactory
+import org.mybatis.spring.SqlSessionFactoryBean
+import org.mybatis.spring.annotation.MapperScan
+import org.mybatis.spring.boot.autoconfigure.SpringBootVFS
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.orm.jpa.JpaTransactionManager
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
-import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.EnableTransactionManagement
 import javax.sql.DataSource
 
 @Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories(
-        entityManagerFactoryRef = "entityManagerFactory",
-        transactionManagerRef = "transactionManager",
-        basePackages = ["com.example.demo.api"]
+//@EnableTransactionManagement
+//@EnableJpaRepositories(
+//        entityManagerFactoryRef = "entityManagerFactory",
+//        transactionManagerRef = "transactionManager",
+//        basePackages = ["com.example.demo.api"]
+//)
+@MapperScan(
+        basePackages = ["com.example.demo.api.**.repository"],
+        sqlSessionFactoryRef = "sessionFactory"
 )
 class DataSourceConfig {
     @Primary
     @Bean
-    @ConfigurationProperties("spring.datasource.rdbmysql")
+    @ConfigurationProperties("spring.datasource")
     fun dataSource(): DataSource {
         val dataSource = DataSourceBuilder.create().type(HikariDataSource::class.java).build()
 
@@ -49,5 +55,19 @@ class DataSourceConfig {
     @Bean
     fun transactionManager(builder: EntityManagerFactoryBuilder): JpaTransactionManager {
         return JpaTransactionManager(entityManagerFactory(builder).`object`!!)
+    }
+
+    @Primary
+    @Bean
+    fun sessionFactory(): SqlSessionFactory {
+        val sqlSessionFactoryBean = SqlSessionFactoryBean()
+
+        sqlSessionFactoryBean.setDataSource((this.dataSource()))
+        sqlSessionFactoryBean.setTypeAliasesPackage("com.example.demo.api")
+        sqlSessionFactoryBean.setMapperLocations(PathMatchingResourcePatternResolver().getResources("classpath:/mybatis/mapper/**/*.xml"))
+//        sqlSessionFactoryBean.setConfiguration(MyBatisConfig())
+        sqlSessionFactoryBean.vfs = SpringBootVFS::class.java
+
+        return sqlSessionFactoryBean.`object`!!
     }
 }

@@ -26,6 +26,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
+	implementation("org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2")
+
 	implementation("mysql:mysql-connector-java")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -33,6 +35,9 @@ dependencies {
 	}
 
 }
+
+val appName = "demo"
+val appVer = "0.1.1"
 
 tasks.withType<Test> {
 	useJUnitPlatform()
@@ -47,4 +52,19 @@ tasks.withType<KotlinCompile> {
 
 tasks.getByName<BootRun>("bootRun") {
 	main = "com.example.demo.DemoApplicationKt"
+}
+
+tasks.bootJar {
+	manifest {
+		attributes("Multi-Release" to true)
+		attributes("Title" to "demo")
+		attributes("Main-class" to "com.example.demo.DemoApplication")
+	}
+
+	archiveBaseName.set(appName)
+	archiveVersion.set(appVer)
+
+	if (project.hasProperty("archiveName")) {
+		archiveFileName.set(project.properties["archiveName"] as String)
+	}
 }

@@ -13,8 +13,12 @@ class MemberController(
     @GetMapping()
     fun getMemberList(@RequestParam type: String?): ResponseEntity<*> {
         val users = memberService.getMemberList(type)
+        val userCnt = memberService.getMemberCnt()
 
-        return ResponseEntity.ok(users?: listOf(0))
+        val data = HashMap<String, Any>()
+        data["userList"] = users?: listOf(0)
+        data["userCnt"] = userCnt
+        return ResponseEntity.ok(data)
     }
 
     @GetMapping("/{id}")
@@ -28,7 +32,9 @@ class MemberController(
     fun setMember(@RequestBody member: Member): ResponseEntity<*> {
         val res = memberService.setMember(member)
 
-        return ResponseEntity.ok(res)
+        val data = HashMap<String, Any>()
+        data["isSuccess"] = 1
+        return ResponseEntity.ok(data)
     }
 
 }
